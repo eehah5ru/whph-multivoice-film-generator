@@ -1,0 +1,36 @@
+---
+sources:
+  - /media/eehah5ru/bb3/_works/_rbob/_media/2020/screenings-for-random-teaser
+  - /media/eehah5ru/bb3/_works/_rbob/_media/2020/underwater-artifacts
+  - /media/eehah5ru/bb3/_works/_rbob/_media/2020/_unsorted
+  - /media/eehah5ru/bb3/_works/_rbob/_media/2016
+  - /media/eehah5ru/bb3/_works/_rbob/_media/2017
+  - /media/eehah5ru/bb3/_works/_rbob/_media/2018
+  - /media/eehah5ru/bb3/_works/_rbob/_media/2019
+  - /media/eehah5ru/bb3/_works/_rbob/_media/_madrid
+  - /media/eehah5ru/bb3/_works/_rbob/_media/_pact
+  - /media/eehah5ru/bb3/_works/_rbob/_media/_seminar
+  - /hole/works/_whph/2021-cetka-short-film/whph-multivoice-film-generator/_media/for-random-montazh
+
+video_suffixes:
+  - mp4
+  - MP4
+  - mov
+  - MOV
+  - mkv
+  - MKV
+  - m4v
+  - M4V
+excluded_subdirs:
+  - "*Previews*"
+trim-n-times:
+  src-dir: src_recoded
+  black-prob: 0
+  min-len: 4
+  max-len: 8
+  count: 66
+container_format: mp4
+video_duration_secs: 272.0
+video_duration: "00:04:32"
+subtitles_ru: /hole/works/_whph/2021-cetka-short-film/whph-multivoice-film-generator/data/whph-subs-ru-final.ass
+subtitles_en: /hole/works/_whph/2021-cetka-short-film/whph-multivoice-film-generator/data/whph-subs-en-final.ass
