@@ -241,7 +241,7 @@ class SubsBurner
   end
 
   def burn_subs_cmd
-    "ffmpeg -i #{source_video_file} -t #{CONFIG['video_duration']} -vf 'ass=#{subs_file}' -c:v h264_nvenc -preset lossless -profile:v high -rc-lookahead 8  -rc cbr_hq -cq 0 -b:v 0 -maxrate 120M -bufsize 240M -c:a copy #{target_file}"
+    "ffmpeg -hwaccel cuda -i #{source_video_file} -t #{CONFIG['video_duration']} -vf 'ass=#{subs_file}' -c:v h264_nvenc -preset lossless -profile:v high -rc-lookahead 8  -rc cbr_hq -cq 0 -b:v 0 -maxrate 120M -bufsize 240M -c:a copy #{target_file}"
   end
 
   def define_tasks
@@ -285,7 +285,7 @@ class MakeSmallVideo
   end
 
   def make_small_cmd
-    "ffmpeg -vsync 0 -hwaccel cuda -hwaccel_output_format cuda -i #{source_file} -c:v h264_nvenc  -b:v 2M  -c:a aac #{target_file}"
+    "ffmpeg -vsync 0 -hwaccel cuda -i #{source_file} -c:v h264_nvenc  -b:v 2M  -c:a aac #{target_file}"
   end
 
   def define_tasks
