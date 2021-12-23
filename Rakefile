@@ -206,15 +206,20 @@ class SubsBurner
   end
 
   def target_file
-    File.join('out', name, "video-#{name}-subs.#{CONFIG['container_format']}")
+    File.join('out', name, "video-#{name}-subs-ru-en.#{CONFIG['container_format']}")
+  end
+
+  def target_file_ru_only
+    File.join('out', name, "video-#{name}-subs-ru.#{CONFIG['container_format']}")
   end
 
   def source_video_file
     File.join('out', name, "video-#{name}.#{CONFIG['container_format']}")
   end
 
-  def subs_file
-    CONFIG['subtitles_ru']
+  def subs_file(lang)
+    abort("there is no subs file for lang #{lang}") unless CONFIG["subtitles_#{lang.to_s}"]
+    CONFIG["subtitles_#{lang.to_s}"]
   end
 
   def root_task
@@ -240,15 +245,27 @@ class SubsBurner
     source_video_duration >= CONFIG['video_duration_secs']
   end
 
-  def burn_subs_cmd
-    "ffmpeg -hwaccel cuda -i #{source_video_file} -t #{CONFIG['video_duration']} -vf 'ass=#{subs_file}' -c:v h264_nvenc -preset lossless -profile:v high -rc-lookahead 8  -rc cbr_hq -cq 0 -b:v 0 -maxrate 120M -bufsize 240M -c:a copy #{target_file}"
+  def burn_subs_cmd(src_file, dst_file, lang)
+    "ffmpeg -hwaccel cuda -threads 8 -i #{src_file} -t #{CONFIG['video_duration']} -vf 'ass=#{subs_file(lang)}' -c:v h264_nvenc -preset lossless -profile:v high -rc-lookahead 8  -rc cbr_hq -cq 0 -b:v 0 -maxrate 120M -bufsize 240M -surfaces 16 -c:a copy #{dst_file}"
   end
 
   def define_tasks
-    @root_task = file target_file => [source_video_file, subs_file] do
+    # burn ru subs
+    file target_file_ru_only => [source_video_file, subs_file(:ru)] do
       abort('video is not enough long!') unless long_enough?
-      system burn_subs_cmd
+
+      abort('error burning ru subs') unless system(burn_subs_cmd(source_video_file, target_file_ru_only, :ru))
+
     end
+
+    # burn en subs
+    file target_file => [target_file_ru_only, subs_file(:en)] do
+      abort('video is not enough long!') unless long_enough?
+
+      abort('error burning en subs') unless system(burn_subs_cmd(target_file_ru_only, target_file, :en))
+    end
+
+    @root_task = task "all_subs_#{name}" => [target_file, target_file_ru_only]
   end
 end
 
@@ -265,11 +282,11 @@ class MakeSmallVideo
   end
 
   def target_file
-    File.join('out', name, "video-#{name}-subs-small.#{CONFIG['container_format']}")
+    File.join('out', name, "video-#{name}-subs-ru-en-small.#{CONFIG['container_format']}")
   end
 
   def source_file
-    File.join('out', name, "video-#{name}-subs.#{CONFIG['container_format']}")
+    File.join('out', name, "video-#{name}-subs-ru-en.#{CONFIG['container_format']}")
   end
 
   def root_task
@@ -285,12 +302,12 @@ class MakeSmallVideo
   end
 
   def make_small_cmd
-    "ffmpeg -vsync 0 -hwaccel cuda -i #{source_file} -c:v h264_nvenc  -b:v 2M  -c:a aac #{target_file}"
+    "ffmpeg -vsync 0 -hwaccel cuda -threads 8 -i #{source_file} -c:v h264_nvenc -b:v 2M -surfaces 8 -c:a aac #{target_file}"
   end
 
   def define_tasks
     @root_task = file target_file => [source_file] do
-      abort("error in making small video") unless system make_small_cmd
+      abort('error in making small video') unless system make_small_cmd
     end
   end
 end
